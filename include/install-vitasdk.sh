@@ -1,8 +1,14 @@
 #!/bin/bash
 
 get_download_link () {
-  wget -qO- https://github.com/vitasdk/vita-headers/raw/master/.travis.d/last_built_toolchain.py | python3 - $@
-}
+ if ! [[ "$(uname -m)" =~ ^(armv7l|arm64|aarch64)$ ]]; then
+    wget -qO- https://github.com/vitasdk/vita-headers/raw/master/.travis.d/last_built_toolchain.py | python - $@
+  elif [[ "$(uname -s)" == Linux* ]]; then
+    curl -s https://api.github.com/repos/SonicMastr/autobuilds/releases/latest | awk -F\" '/browser_download_url.*.tar.bz2/{print $(NF-1)}'
+  else
+    echo "Unsupported Architecture. VitaSDK not installed"
+    exit 1
+  fi}
 
 install_vitasdk () {
   INSTALLDIR=$1
